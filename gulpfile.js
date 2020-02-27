@@ -7,7 +7,16 @@ const cleanCSS = require('gulp-clean-css');
 const uglify = require('gulp-uglify');
 const del = require('del');
 const browserSync = require('browser-sync').create();
+const sass = require('gulp-sass');
+const sourcemaps = require('gulp-sourcemaps');
+const watch = require('gulp-watch');
 
+
+//Пути файлов SASS
+const sassFiles = [
+    './src/sass/main.sass',
+    './src/sass/media.sass'
+]
 //Пути файлов CSS
 const cssFiles = [
     './src/css/main.css',
@@ -22,17 +31,21 @@ const jsFiles = [
 exports.default = function() {
     return src('src/*.js')
       .pipe(babel())
-      .pipe(dest('build/'));
+      .pipe(dest('public/'));
   }
 
-//Функция объединяет стили в один файл или складываем в папку build
+//Функция объединяет файлы sass, ставим префикси, минифицируем и переносим в папку public
 function styles() {
     //Удаляем все файлы в папке CSS
-    del(['build/css/*'])
-    //Возвращаем массив с путями к файлам CSS
-    return gulp.src(cssFiles)
-    //Объединяем файлы из массива cssFiles в один файл
-    .pipe(concat('style.css'))
+    del(['public/css/*'])
+    //Возвращаем массив с путями к файлам SASS
+    return gulp.src(sassFiles)
+    //Объединяем файлы из массива sassFiles в один файл
+    .pipe(concat('style.sass'))
+    //Инициализируем карту
+    .pipe(sourcemaps.init())
+    //Компилируем из sass в css
+    .pipe(sass())
     //Добавим префиксы
     .pipe(autoprefixer({
         overrideBrowserslist: ['last 2 versions']
@@ -41,16 +54,18 @@ function styles() {
     .pipe(cleanCSS({
         level: 2
     }))
-    //Выходная папка для стилей
-    .pipe(gulp.dest('./build/css'))
+    //Записываем карту
+    .pipe(sourcemaps.write('./'))
+    //Переносим в папку для стилей
+    .pipe(gulp.dest('./public/css'))
     //Обновляем браузер
     .pipe(browserSync.stream())
 }
 
-//Функция объединяет скрипты в один файл или складываем в папку build
+//Функция объединяет скрипты в один файл или складываем в папку public
 function scripts() {
     //Удаляем все файлы в папке js
-    del(['build/js/*'])
+    del(['public/js/*'])
     return gulp.src(jsFiles)
     .pipe(concat('script.js'))
     //Минификация JS
@@ -58,12 +73,13 @@ function scripts() {
         toplevel: true
     }))
     //Выходная папка для JS
-    .pipe(gulp.dest('./build/js'))
+    .pipe(gulp.dest('./public/js'))
     //Обновляем браузер
     .pipe(browserSync.stream())
 }
+
 //Наблюдатель за изменениями файлов
-function watch() {
+function watchs() {
     browserSync.init({
         server: {
             baseDir: "./"
@@ -75,7 +91,11 @@ function watch() {
     gulp.watch('./src/css/**/*.js', scripts)
     //При изменении html перезагружаем страницу
     gulp.watch('./*.html').on('change', browserSync.reload)
+
+    gulp.watch('./src/sass/**/*.sass', gulp.series('styles'))
 }
+
+
 
 //Вызываем функцию объединения стилей
 gulp.task('styles', styles);
@@ -84,10 +104,11 @@ gulp.task('styles', styles);
 gulp.task('scripts', scripts);
 
 //Отслеживаем события
-gulp.task('watch', watch)
+gulp.task('watchs', watchs)
 
 //Запускаем сборщик
 gulp.task('build', gulp.series(gulp.parallel(styles, scripts)))
 
 //Запускаем наблюдателя и сборщик
-gulp.task('dev', gulp.series('build', 'watch'))
+gulp.task('dev', gulp.series('build', 'watchs'))
+
