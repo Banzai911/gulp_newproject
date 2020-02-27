@@ -18,10 +18,10 @@ const sassFiles = [
     './src/sass/media.sass'
 ]
 //Пути файлов CSS
-const cssFiles = [
-    './src/css/main.css',
-    './src/css/media.css'
-]
+// const cssFiles = [
+//     './src/css/main.css',
+//     './src/css/media.css'
+// ]
 //Пути файлов JS
 const jsFiles = [
     './src/js/lib.js',
