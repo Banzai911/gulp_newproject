@@ -14,14 +14,14 @@ const watch = require('gulp-watch');
 
 //Пути файлов SASS
 const sassFiles = [
-    './src/sass/*.sass'
+    './src/sass/main.sass'
     // './src/sass/media.sass'
 ]
 //Пути файлов CSS
-const cssFiles = [
-    './src/css/*.css',
-    './src/css/media.css'
-];
+// const cssFiles = [
+//     './src/css/*.css',
+//     './src/css/media.css'
+// ];
 //Пути файлов JS
 const jsFiles = [
     './src/js/*.js'
@@ -101,6 +101,12 @@ function imgChange() {
         .pipe(gulp.dest('./dist/img/'))
         .pipe(browserSync.stream())
 }
+function fontsChange() {
+    del(['dist/fonts/**']);
+    return gulp.src(['./src/fonts/**'])
+        .pipe(gulp.dest('./dist/fonts/'))
+        .pipe(browserSync.stream())
+}
 
 //Наблюдатель за изменениями файлов
 function watchs() {
@@ -110,7 +116,7 @@ function watchs() {
         }
     });
     //Следить за CSS файлами
-    gulp.watch('./src/css/**/*.css', styles);
+    // gulp.watch('./src/css/**/*.css', styles);
     //Следить за JS файлами
     gulp.watch('./src/css/**/*.js', scripts);
     //Watch for changes html files
@@ -119,6 +125,8 @@ function watchs() {
     gulp.watch('./src/*.html').on('change', browserSync.reload);
     //Watch for changes img folder
     gulp.watch('./src/img/**', imgChange);
+    //Watch fo changes fonts folder
+    gulp.watch('./src/fonts/**', fontsChange);
     //Watch for changes styles files
     gulp.watch('./src/sass/**/*.sass', gulp.series('styles'));
     //Watch for changes JS files
@@ -135,7 +143,7 @@ gulp.task('scripts', scripts);
 gulp.task('watchs', watchs);
 
 //Запускаем сборщик
-gulp.task('build', gulp.series(gulp.parallel(styles, scripts, htmlChange, imgChange)));
+gulp.task('build', gulp.series(gulp.parallel(styles, scripts, htmlChange, imgChange, fontsChange)));
 
 //Запускаем наблюдателя и сборщик
 gulp.task('dev', gulp.series('build', 'watchs'));
